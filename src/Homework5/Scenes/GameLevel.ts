@@ -43,11 +43,11 @@ export default class GameLevel extends Scene {
     protected nextLevel: new (...args: any) => GameLevel;
     protected levelEndTimer: Timer;
     protected levelEndLabel: Label;
-    
+
     // Screen fade in/out for level start and end
     protected levelTransitionTimer: Timer;
     protected levelTransitionScreen: Rect;
-    
+
     // Custom particle sysyem
     protected system: HW5_ParticleSystem;
 
@@ -77,7 +77,7 @@ export default class GameLevel extends Scene {
 
         // Initialize the timers
         this.respawnTimer = new Timer(1000, () => {
-            if(GameLevel.livesCount === 0){
+            if (GameLevel.livesCount === 0) {
                 this.sceneManager.changeToScene(MainMenu);
             } else {
                 this.respawnPlayer();
@@ -99,22 +99,22 @@ export default class GameLevel extends Scene {
 
         // Initially disable player movement
         Input.disableInput();
-        this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, {color: HW5_Color.RED});
+        this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, { color: HW5_Color.RED });
     }
 
 
-    updateScene(deltaT: number){
+    updateScene(deltaT: number) {
         // Handle events and update the UI if needed
-        while(this.receiver.hasNextEvent()){
+        while (this.receiver.hasNextEvent()) {
             let event = this.receiver.getNextEvent();
-            
-            switch(event.type){
+
+            switch (event.type) {
                 case HW5_Events.PLAYER_HIT_SWITCH:
                     {
                         // Hit a switch block, so update the label and count
                         this.switchesPressed++;
                         this.switchLabel.text = "Switches Left: " + (this.totalSwitches - this.switchesPressed)
-                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "switch", loop: false, holdReference: false});
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "switch", loop: false, holdReference: false });
                     }
                     break;
 
@@ -123,12 +123,12 @@ export default class GameLevel extends Scene {
                         let node = this.sceneGraph.getNode(event.data.get("node"));
                         let other = this.sceneGraph.getNode(event.data.get("other"));
 
-                        if(node === this.player){
+                        if (node === this.player) {
                             // Node is player, other is balloon
                             this.handlePlayerBalloonCollision(<AnimatedSprite>node, <AnimatedSprite>other);
                         } else {
                             // Other is player, node is balloon
-                            this.handlePlayerBalloonCollision(<AnimatedSprite>other,<AnimatedSprite>node);
+                            this.handlePlayerBalloonCollision(<AnimatedSprite>other, <AnimatedSprite>node);
 
                         }
                     }
@@ -140,7 +140,7 @@ export default class GameLevel extends Scene {
                         this.balloonsPopped++;
                         this.balloonLabel.text = "Balloons Left: " + (this.totalBalloons - this.balloonsPopped);
                         let node = this.sceneGraph.getNode(event.data.get("owner"));
-                        
+
                         // Set mass based on color
                         let particleMass = 0;
                         if ((<BalloonController>node._ai).color == HW5_Color.RED) {
@@ -156,12 +156,12 @@ export default class GameLevel extends Scene {
                         node.destroy();
                     }
                     break;
-                    
+
                 case HW5_Events.PLAYER_ENTERED_LEVEL_END:
                     {
                         //Check if the player has pressed all the switches and popped all of the balloons
-                        if (this.switchesPressed >= this.totalSwitches && this.balloonsPopped >= this.totalBalloons){
-                            if(!this.levelEndTimer.hasRun() && this.levelEndTimer.isStopped()){
+                        if (this.switchesPressed >= this.totalSwitches && this.balloonsPopped >= this.totalBalloons) {
+                            if (!this.levelEndTimer.hasRun() && this.levelEndTimer.isStopped()) {
                                 // The player has reached the end of the level
                                 this.levelEndTimer.start();
                                 this.levelEndLabel.tweens.play("slideIn");
@@ -176,20 +176,20 @@ export default class GameLevel extends Scene {
                         Input.enableInput();
                     }
                     break;
-                
+
                 case HW5_Events.LEVEL_END:
                     {
                         // Go to the next level
-                        if(this.nextLevel){
+                        if (this.nextLevel) {
                             let sceneOptions = {
                                 physics: {
                                     groupNames: ["ground", "player", "balloon"],
                                     collisions:
-                                    [
-                                        [0, 1, 1],
-                                        [1, 0, 0],
-                                        [1, 0, 0]
-                                    ]
+                                        [
+                                            [0, 1, 1],
+                                            [1, 0, 0],
+                                            [1, 0, 0]
+                                        ]
                                 }
                             }
                             this.sceneManager.changeToScene(this.nextLevel, {}, sceneOptions);
@@ -211,15 +211,15 @@ export default class GameLevel extends Scene {
          */
         if (this.suitChangeTimer.isStopped()) {
             if (Input.isKeyJustPressed("1")) {
-                this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, {color: HW5_Color.RED});
+                this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, { color: HW5_Color.RED });
                 this.suitChangeTimer.start();
             }
             if (Input.isKeyJustPressed("2")) {
-                this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, {color: HW5_Color.BLUE});
+                this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, { color: HW5_Color.BLUE });
                 this.suitChangeTimer.start();
             }
             if (Input.isKeyJustPressed("3")) {
-                this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, {color: HW5_Color.GREEN});
+                this.emitter.fireEvent(HW5_Events.SUIT_COLOR_CHANGE, { color: HW5_Color.GREEN });
                 this.suitChangeTimer.start();
             }
         }
@@ -246,7 +246,7 @@ export default class GameLevel extends Scene {
     /**
      * Handles all subscriptions to events
      */
-    protected subscribeToEvents(){
+    protected subscribeToEvents() {
         this.receiver.subscribe([
             HW5_Events.PLAYER_HIT_SWITCH,
             HW5_Events.PLAYER_HIT_BALLOON,
@@ -261,22 +261,22 @@ export default class GameLevel extends Scene {
     /**
      * Adds in any necessary UI to the game
      */
-    protected addUI(){
+    protected addUI() {
         // In-game labels
-        this.balloonLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", {position: new Vec2(80, 30), text: "Balloons Left: " + (this.totalBalloons - this.balloonsPopped)});
+        this.balloonLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(80, 30), text: "Balloons Left: " + (this.totalBalloons - this.balloonsPopped) });
         this.balloonLabel.textColor = Color.BLACK
         this.balloonLabel.font = "PixelSimple";
 
-        this.switchLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", {position: new Vec2(80, 50), text: "Switches Left: " + (this.totalSwitches - this.switchesPressed)});
+        this.switchLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(80, 50), text: "Switches Left: " + (this.totalSwitches - this.switchesPressed) });
         this.switchLabel.textColor = Color.BLACK;
         this.switchLabel.font = "PixelSimple";
 
-        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", {position: new Vec2(500, 30), text: "Lives: " + GameLevel.livesCount});
+        this.livesCountLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(500, 30), text: "Lives: " + GameLevel.livesCount });
         this.livesCountLabel.textColor = Color.BLACK;
         this.livesCountLabel.font = "PixelSimple";
 
         // End of level label (start off screen)
-        this.levelEndLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", {position: new Vec2(-300, 200), text: "Level Complete"});
+        this.levelEndLabel = <Label>this.add.uiElement(UIElementType.LABEL, "UI", { position: new Vec2(-300, 200), text: "Level Complete" });
         this.levelEndLabel.size.set(1200, 60);
         this.levelEndLabel.borderRadius = 0;
         this.levelEndLabel.backgroundColor = new Color(34, 32, 52);
@@ -302,7 +302,7 @@ export default class GameLevel extends Scene {
         this.system = new HW5_ParticleSystem(100, new Vec2((5 * 32), (10 * 32)), 2000, 3, 1, 100);
         this.system.initializePool(this, "primary");
 
-        this.levelTransitionScreen = <Rect>this.add.graphic(GraphicType.RECT, "UI", {position: new Vec2(300, 200), size: new Vec2(600, 400)});
+        this.levelTransitionScreen = <Rect>this.add.graphic(GraphicType.RECT, "UI", { position: new Vec2(300, 200), size: new Vec2(600, 400) });
         this.levelTransitionScreen.color = new Color(34, 32, 52);
         this.levelTransitionScreen.alpha = 1;
 
@@ -342,14 +342,14 @@ export default class GameLevel extends Scene {
         // Add the player
         this.player = this.add.animatedSprite("player", "primary");
         this.player.scale.set(2, 2);
-        if(!this.playerSpawn){
+        if (!this.playerSpawn) {
             console.warn("Player spawn was never set - setting spawn to (0, 0)");
             this.playerSpawn = Vec2.ZERO;
         }
         this.player.position.copy(this.playerSpawn);
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(14, 14)));
         this.player.colliderOffset.set(0, 2);
-        this.player.addAI(PlayerController, {playerType: "platformer", tilemap: "Main", color: HW5_Color.RED});
+        this.player.addAI(PlayerController, { playerType: "platformer", tilemap: "Main", color: HW5_Color.RED });
 
         this.player.setGroup("player");
 
@@ -360,7 +360,7 @@ export default class GameLevel extends Scene {
      * Initializes the level end area
      */
     protected addLevelEnd(startingTile: Vec2, size: Vec2): void {
-        this.levelEndArea = <Rect>this.add.graphic(GraphicType.RECT, "primary", {position: startingTile.scale(32), size: size.scale(32)});
+        this.levelEndArea = <Rect>this.add.graphic(GraphicType.RECT, "primary", { position: startingTile.scale(32), size: size.scale(32) });
         this.levelEndArea.addPhysics(undefined, undefined, false, true);
         this.levelEndArea.setTrigger("player", HW5_Events.PLAYER_ENTERED_LEVEL_END, null);
         this.levelEndArea.color = new Color(0, 0, 0, 0);
@@ -381,7 +381,7 @@ export default class GameLevel extends Scene {
      */
     protected addBalloon(spriteKey: string, tilePos: Vec2, aiOptions: Record<string, any>): void {
         let balloon = this.add.animatedSprite(spriteKey, "primary");
-        balloon.position.set(tilePos.x*32, tilePos.y*32);
+        balloon.position.set(tilePos.x * 32, tilePos.y * 32);
         balloon.scale.set(2, 2);
         balloon.addPhysics();
         balloon.addAI(BalloonController, aiOptions);
@@ -416,6 +416,10 @@ export default class GameLevel extends Scene {
      * 
      */
     protected handlePlayerBalloonCollision(player: AnimatedSprite, balloon: AnimatedSprite) {
+        if (player.boundary.overlaps(balloon.boundary)) {
+
+            console.log('ahhhhh')
+        }
     }
 
     /**
@@ -425,10 +429,10 @@ export default class GameLevel extends Scene {
     protected incPlayerLife(amt: number): void {
         GameLevel.livesCount += amt;
         this.livesCountLabel.text = "Lives: " + GameLevel.livesCount;
-        if (GameLevel.livesCount == 0){
+        if (GameLevel.livesCount == 0) {
             Input.disableInput();
             this.player.disablePhysics();
-            this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "player_death", loop: false, holdReference: false});
+            this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "player_death", loop: false, holdReference: false });
             this.player.tweens.play("death");
         }
     }
@@ -438,7 +442,7 @@ export default class GameLevel extends Scene {
      */
     protected respawnPlayer(): void {
         GameLevel.livesCount = 3;
-        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "level_music"});
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, { key: "level_music" });
         this.sceneManager.changeToScene(MainMenu, {});
         Input.enableInput();
         this.system.stopSystem();

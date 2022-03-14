@@ -57,15 +57,31 @@ export default class PlayerController extends StateMachineAI {
         this.suitColor = options.color;
 
         this.receiver.subscribe(HW5_Events.SUIT_COLOR_CHANGE);
-
-        owner.tweens.add("flip", {
+        
+        owner.tweens.add("death", {
             startDelay: 0,
-            duration: 500,
+            duration: 1000,
             effects: [
                 {
                     property: "rotation",
                     start: 0,
-                    end: 2*Math.PI,
+                    end: 8*Math.PI,
+                    ease: EaseFunctionType.IN_OUT_QUAD
+                }
+            ],
+            onEnd: () => {
+                this.emitter.fireEvent(HW5_Events.PLAYER_KILLED)
+            }
+        })
+
+        owner.tweens.add("flip", {
+            startDelay: 0,
+            duration: 750,
+            effects: [
+                {
+                    property: "rotation",
+                    start: 0,
+                    end: 4*Math.PI,
                     ease: EaseFunctionType.IN_OUT_QUAD
                 }
             ]
@@ -86,7 +102,7 @@ export default class PlayerController extends StateMachineAI {
         this.addState(PlayerStates.JUMP, jump);
         let fall = new Fall(this, this.owner);
         this.addState(PlayerStates.FALL, fall);
-        
+
         this.initialize(PlayerStates.IDLE);
     }
 
@@ -113,7 +129,6 @@ export default class PlayerController extends StateMachineAI {
      */
     update(deltaT: number): void {
 		super.update(deltaT);
-
 		if(this.currentState instanceof Jump){
 			Debug.log("playerstate", "Player State: Jump");
 		} else if (this.currentState instanceof Walk){
@@ -125,5 +140,13 @@ export default class PlayerController extends StateMachineAI {
 		} else if(this.currentState instanceof Fall){
             Debug.log("playerstate", "Player State: Fall");
         }
+
+        let tileCoord = this.tilemap.getColRowAt(this.owner.position)
+        // let tile = this.tilemap.getTileAtRowCol(tileCoord)
+        let tile = this.tilemap.getTile(tileCoord.x * tileCoord.y)
+        // let tile = this.tilemap.getTileAtWorldPosition(new Vec2(tileCoord.x, tileCoord.y + 1))
+        // let tile = this.tilemap.getTile(tileCoord.y * (tileCoord.x + 1))
+        // console.log(tileCoord.x + ', ' + tileCoord.y)
+        console.log(tile)
 	}
 }
