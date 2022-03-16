@@ -22,17 +22,17 @@ export enum PlayerType {
 export enum PlayerStates {
     IDLE = "idle",
     WALK = "walk",
-	RUN = "run",
-	JUMP = "jump",
+    RUN = "run",
+    JUMP = "jump",
     FALL = "fall",
-	PREVIOUS = "previous"
+    PREVIOUS = "previous"
 }
 
 export default class PlayerController extends StateMachineAI {
     protected owner: GameNode;
     velocity: Vec2 = Vec2.ZERO;
-	speed: number = 200;
-	MIN_SPEED: number = 200;
+    speed: number = 200;
+    MIN_SPEED: number = 200;
     MAX_SPEED: number = 300;
     tilemap: OrthogonalTilemap;
     suitColor: HW5_Color;
@@ -47,7 +47,7 @@ export default class PlayerController extends StateMachineAI {
      * 
      * Look at incPlayerLife() in GameLevel to see where this animation would be called.
      */
-    initializeAI(owner: GameNode, options: Record<string, any>){
+    initializeAI(owner: GameNode, options: Record<string, any>) {
         this.owner = owner;
 
         this.initializePlatformer();
@@ -57,7 +57,7 @@ export default class PlayerController extends StateMachineAI {
         this.suitColor = options.color;
 
         this.receiver.subscribe(HW5_Events.SUIT_COLOR_CHANGE);
-        
+
         owner.tweens.add("death", {
             startDelay: 0,
             duration: 1000,
@@ -65,7 +65,7 @@ export default class PlayerController extends StateMachineAI {
                 {
                     property: "rotation",
                     start: 0,
-                    end: 8*Math.PI,
+                    end: 8 * Math.PI,
                     ease: EaseFunctionType.IN_OUT_QUAD
                 }
             ],
@@ -81,7 +81,7 @@ export default class PlayerController extends StateMachineAI {
                 {
                     property: "rotation",
                     start: 0,
-                    end: 4*Math.PI,
+                    end: 4 * Math.PI,
                     ease: EaseFunctionType.IN_OUT_QUAD
                 }
             ]
@@ -93,12 +93,12 @@ export default class PlayerController extends StateMachineAI {
         this.speed = 400;
 
         let idle = new Idle(this, this.owner);
-		this.addState(PlayerStates.IDLE, idle);
-		let walk = new Walk(this, this.owner);
-		this.addState(PlayerStates.WALK, walk);
-		let run = new Run(this, this.owner);
-		this.addState(PlayerStates.RUN, run);
-		let jump = new Jump(this, this.owner);
+        this.addState(PlayerStates.IDLE, idle);
+        let walk = new Walk(this, this.owner);
+        this.addState(PlayerStates.WALK, walk);
+        let run = new Run(this, this.owner);
+        this.addState(PlayerStates.RUN, run);
+        let jump = new Jump(this, this.owner);
         this.addState(PlayerStates.JUMP, jump);
         let fall = new Fall(this, this.owner);
         this.addState(PlayerStates.FALL, fall);
@@ -109,7 +109,7 @@ export default class PlayerController extends StateMachineAI {
     changeState(stateName: string): void {
         // If we jump or fall, push the state so we can go back to our current state later
         // unless we're going from jump to fall or something
-        if((stateName === PlayerStates.JUMP || stateName === PlayerStates.FALL) && !(this.stack.peek() instanceof InAir)){
+        if ((stateName === PlayerStates.JUMP || stateName === PlayerStates.FALL) && !(this.stack.peek() instanceof InAir)) {
             this.stack.push(this.stateMap.get(stateName));
         }
 
@@ -128,25 +128,25 @@ export default class PlayerController extends StateMachineAI {
      * 
      */
     update(deltaT: number): void {
-		super.update(deltaT);
-		if(this.currentState instanceof Jump){
-			Debug.log("playerstate", "Player State: Jump");
-		} else if (this.currentState instanceof Walk){
-			Debug.log("playerstate", "Player State: Walk");
-		} else if (this.currentState instanceof Run){
-			Debug.log("playerstate", "Player State: Run");
-		} else if (this.currentState instanceof Idle){
-			Debug.log("playerstate", "Player State: Idle");
-		} else if(this.currentState instanceof Fall){
+        super.update(deltaT);
+        if (this.currentState instanceof Jump) {
+            Debug.log("playerstate", "Player State: Jump");
+        } else if (this.currentState instanceof Walk) {
+            Debug.log("playerstate", "Player State: Walk");
+        } else if (this.currentState instanceof Run) {
+            Debug.log("playerstate", "Player State: Run");
+        } else if (this.currentState instanceof Idle) {
+            Debug.log("playerstate", "Player State: Idle");
+        } else if (this.currentState instanceof Fall) {
             Debug.log("playerstate", "Player State: Fall");
         }
 
         let tileCoord = this.tilemap.getColRowAt(this.owner.position)
-        // let tile = this.tilemap.getTileAtRowCol(tileCoord)
-        let tile = this.tilemap.getTile(tileCoord.x * tileCoord.y)
-        // let tile = this.tilemap.getTileAtWorldPosition(new Vec2(tileCoord.x, tileCoord.y + 1))
-        // let tile = this.tilemap.getTile(tileCoord.y * (tileCoord.x + 1))
-        // console.log(tileCoord.x + ', ' + tileCoord.y)
-        console.log(tile)
-	}
+        tileCoord = new Vec2(tileCoord.x, tileCoord.y + 1)
+        let tile = this.tilemap.getTileAtRowCol(tileCoord)
+        if (tile === 8) { // If tile is an off switch, change to on switch and fire event
+            this.tilemap.setTileAtRowCol(tileCoord, 9)
+            this.emitter.fireEvent(HW5_Events.PLAYER_HIT_SWITCH)
+        }
+    }
 }

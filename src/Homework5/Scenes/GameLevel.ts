@@ -109,98 +109,89 @@ export default class GameLevel extends Scene {
             let event = this.receiver.getNextEvent();
 
             switch (event.type) {
-                case HW5_Events.PLAYER_HIT_SWITCH:
-                    {
-                        // Hit a switch block, so update the label and count
-                        this.switchesPressed++;
-                        this.switchLabel.text = "Switches Left: " + (this.totalSwitches - this.switchesPressed)
-                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "switch", loop: false, holdReference: false });
-                    }
+                case HW5_Events.PLAYER_HIT_SWITCH: {
+                    // Hit a switch block, so update the label and count
+                    this.switchesPressed++;
+                    this.switchLabel.text = "Switches Left: " + (this.totalSwitches - this.switchesPressed)
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "switch", loop: false, holdReference: false });
+                }
                     break;
 
-                case HW5_Events.PLAYER_HIT_BALLOON:
-                    {
-                        let node = this.sceneGraph.getNode(event.data.get("node"));
-                        let other = this.sceneGraph.getNode(event.data.get("other"));
-
-                        if (node === this.player) {
-                            // Node is player, other is balloon
-                            this.handlePlayerBalloonCollision(<AnimatedSprite>node, <AnimatedSprite>other);
-                        } else {
-                            // Other is player, node is balloon
-                            this.handlePlayerBalloonCollision(<AnimatedSprite>other, <AnimatedSprite>node);
-
-                        }
+                case HW5_Events.PLAYER_HIT_BALLOON: {
+                    let node = this.sceneGraph.getNode(event.data.get("node"));
+                    let other = this.sceneGraph.getNode(event.data.get("other"));
+                    console.log('OOF')
+                    if (node === this.player) {
+                        // Node is player, other is balloon
+                        this.handlePlayerBalloonCollision(<AnimatedSprite>node, <AnimatedSprite>other);
+                    } else {
+                        // Other is player, node is balloon
+                        this.handlePlayerBalloonCollision(<AnimatedSprite>other, <AnimatedSprite>node);
                     }
+                }
                     break;
 
-                case HW5_Events.BALLOON_POPPED:
-                    {
-                        // An balloon collided with the player, destroy it and use the particle system
-                        this.balloonsPopped++;
-                        this.balloonLabel.text = "Balloons Left: " + (this.totalBalloons - this.balloonsPopped);
-                        let node = this.sceneGraph.getNode(event.data.get("owner"));
+                case HW5_Events.BALLOON_POPPED: {
+                    // An balloon collided with the player, destroy it and use the particle system
+                    this.balloonsPopped++;
+                    this.balloonLabel.text = "Balloons Left: " + (this.totalBalloons - this.balloonsPopped);
+                    let node = this.sceneGraph.getNode(event.data.get("owner"));
 
-                        // Set mass based on color
-                        let particleMass = 0;
-                        if ((<BalloonController>node._ai).color == HW5_Color.RED) {
-                            particleMass = 1;
-                        }
-                        else if ((<BalloonController>node._ai).color == HW5_Color.GREEN) {
-                            particleMass = 2;
-                        }
-                        else {
-                            particleMass = 3;
-                        }
-                        this.system.startSystem(2000, particleMass, node.position.clone());
-                        node.destroy();
+                    // Set mass based on color
+                    let particleMass = 0;
+                    if ((<BalloonController>node._ai).color == HW5_Color.RED) {
+                        particleMass = 1;
                     }
+                    else if ((<BalloonController>node._ai).color == HW5_Color.GREEN) {
+                        particleMass = 2;
+                    }
+                    else {
+                        particleMass = 3;
+                    }
+                    this.system.startSystem(2000, particleMass, node.position.clone());
+                    node.destroy();
+                }
                     break;
 
-                case HW5_Events.PLAYER_ENTERED_LEVEL_END:
-                    {
-                        //Check if the player has pressed all the switches and popped all of the balloons
-                        if (this.switchesPressed >= this.totalSwitches && this.balloonsPopped >= this.totalBalloons) {
-                            if (!this.levelEndTimer.hasRun() && this.levelEndTimer.isStopped()) {
-                                // The player has reached the end of the level
-                                this.levelEndTimer.start();
-                                this.levelEndLabel.tweens.play("slideIn");
+                case HW5_Events.PLAYER_ENTERED_LEVEL_END: {
+                    //Check if the player has pressed all the switches and popped all of the balloons
+                    if (this.switchesPressed >= this.totalSwitches && this.balloonsPopped >= this.totalBalloons) {
+                        if (!this.levelEndTimer.hasRun() && this.levelEndTimer.isStopped()) {
+                            // The player has reached the end of the level
+                            this.levelEndTimer.start();
+                            this.levelEndLabel.tweens.play("slideIn");
+                        }
+                    }
+                }
+                    break;
+
+                case HW5_Events.LEVEL_START: {
+                    // Re-enable controls
+                    Input.enableInput();
+                }
+                    break;
+
+                case HW5_Events.LEVEL_END: {
+                    // Go to the next level
+                    if (this.nextLevel) {
+                        let sceneOptions = {
+                            physics: {
+                                groupNames: ["ground", "player", "balloon"],
+                                collisions:
+                                    [
+                                        [0, 1, 1],
+                                        [1, 0, 0],
+                                        [1, 0, 0]
+                                    ]
                             }
                         }
+                        this.sceneManager.changeToScene(this.nextLevel, {}, sceneOptions);
                     }
+                }
                     break;
-
-                case HW5_Events.LEVEL_START:
-                    {
-                        // Re-enable controls
-                        Input.enableInput();
-                    }
-                    break;
-
-                case HW5_Events.LEVEL_END:
-                    {
-                        // Go to the next level
-                        if (this.nextLevel) {
-                            let sceneOptions = {
-                                physics: {
-                                    groupNames: ["ground", "player", "balloon"],
-                                    collisions:
-                                        [
-                                            [0, 1, 1],
-                                            [1, 0, 0],
-                                            [1, 0, 0]
-                                        ]
-                                }
-                            }
-                            this.sceneManager.changeToScene(this.nextLevel, {}, sceneOptions);
-                        }
-                    }
-                    break;
-                case HW5_Events.PLAYER_KILLED:
-                    {
-                        this.respawnPlayer();
-                    }
-
+                case HW5_Events.PLAYER_KILLED: {
+                    this.respawnPlayer();
+                }
             }
         }
 
@@ -386,7 +377,13 @@ export default class GameLevel extends Scene {
         balloon.addPhysics();
         balloon.addAI(BalloonController, aiOptions);
         balloon.setGroup("balloon");
-
+        // if (balloon.boundary.overlaps(this.player.boundary)) {
+        //     this.emitter.fireEvent(HW5_Events.PLAYER_HIT_BALLOON, 
+        //         {
+        //             node: this.player,
+        //             other: balloon
+        //         })
+        // }
     }
 
     // HOMEWORK 5 - TODO
