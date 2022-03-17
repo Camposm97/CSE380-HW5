@@ -1,11 +1,9 @@
 import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
-import Debug from "../../Wolfie2D/Debug/Debug";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Input from "../../Wolfie2D/Input/Input";
 import { TweenableProperties } from "../../Wolfie2D/Nodes/GameNode";
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
-import Point from "../../Wolfie2D/Nodes/Graphics/Point";
 import Rect from "../../Wolfie2D/Nodes/Graphics/Rect";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
@@ -114,13 +112,13 @@ export default class GameLevel extends Scene {
                     this.switchesPressed++;
                     this.switchLabel.text = "Switches Left: " + (this.totalSwitches - this.switchesPressed)
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, { key: "switch", loop: false, holdReference: false });
+                    this.emitter.fireEvent(HW5_Events.PLAYER_ENTERED_LEVEL_END)
                 }
                     break;
 
                 case HW5_Events.PLAYER_HIT_BALLOON: {
                     let node = this.sceneGraph.getNode(event.data.get("node"));
                     let other = this.sceneGraph.getNode(event.data.get("other"));
-                    console.log('OOF')
                     if (node === this.player) {
                         // Node is player, other is balloon
                         this.handlePlayerBalloonCollision(<AnimatedSprite>node, <AnimatedSprite>other);
@@ -135,9 +133,10 @@ export default class GameLevel extends Scene {
                     // An balloon collided with the player, destroy it and use the particle system
                     this.balloonsPopped++;
                     this.balloonLabel.text = "Balloons Left: " + (this.totalBalloons - this.balloonsPopped);
-                    let node = this.sceneGraph.getNode(event.data.get("owner"));
-
-                    // Set mass based on color
+                    
+                    let node = event.data.get('owner')
+                    console.log(node)
+                    // // Set mass based on color
                     let particleMass = 0;
                     if ((<BalloonController>node._ai).color == HW5_Color.RED) {
                         particleMass = 1;
@@ -150,6 +149,8 @@ export default class GameLevel extends Scene {
                     }
                     this.system.startSystem(2000, particleMass, node.position.clone());
                     node.destroy();
+
+                    this.emitter.fireEvent(HW5_Events.PLAYER_ENTERED_LEVEL_END)
                 }
                     break;
 
@@ -192,6 +193,7 @@ export default class GameLevel extends Scene {
                 case HW5_Events.PLAYER_KILLED: {
                     this.respawnPlayer();
                 }
+                    break;
             }
         }
 
@@ -374,16 +376,10 @@ export default class GameLevel extends Scene {
         let balloon = this.add.animatedSprite(spriteKey, "primary");
         balloon.position.set(tilePos.x * 32, tilePos.y * 32);
         balloon.scale.set(2, 2);
-        balloon.addPhysics();
+        balloon.addPhysics(undefined, undefined, true, false)
+        balloon.setTrigger("player", HW5_Events.PLAYER_HIT_BALLOON, null)
         balloon.addAI(BalloonController, aiOptions);
         balloon.setGroup("balloon");
-        // if (balloon.boundary.overlaps(this.player.boundary)) {
-        //     this.emitter.fireEvent(HW5_Events.PLAYER_HIT_BALLOON, 
-        //         {
-        //             node: this.player,
-        //             other: balloon
-        //         })
-        // }
     }
 
     // HOMEWORK 5 - TODO
@@ -413,9 +409,18 @@ export default class GameLevel extends Scene {
      * 
      */
     protected handlePlayerBalloonCollision(player: AnimatedSprite, balloon: AnimatedSprite) {
-        if (player.boundary.overlaps(balloon.boundary)) {
-
-            console.log('ahhhhh')
+        if (balloon !== undefined) {
+            let pc = <PlayerController> player._ai
+        let bc = <BalloonController> balloon._ai
+        if (bc.color !== pc.suitColor) {
+            this.incPlayerLife(-1)
+            // GameLevel.livesCount--
+            // this.livesCountLabel.text = `Lives: ${GameLevel.livesCount}`
+            // if (GameLevel.livesCount === 0) {
+            //     this.emitter.fireEvent(HW5_Events.PLAYER_KILLED)
+            // }
+        }
+        this.emitter.fireEvent(HW5_Events.BALLOON_POPPED, {owner: balloon})
         }
     }
 
