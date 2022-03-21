@@ -133,7 +133,7 @@ export default class GameLevel extends Scene {
                     // An balloon collided with the player, destroy it and use the particle system
                     this.balloonsPopped++;
                     this.balloonLabel.text = "Balloons Left: " + (this.totalBalloons - this.balloonsPopped);
-                    
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: 'balloon_pop', loop: false})
                     let node = event.data.get('owner')
                     console.log(node)
                     // // Set mass based on color
