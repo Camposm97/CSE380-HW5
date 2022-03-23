@@ -19,10 +19,8 @@ import HW5_ParticleSystem from "../HW5_ParticleSystem";
 import PlayerController from "../Player/PlayerController";
 import MainMenu from "./MainMenu";
 
-// HOMEWORK 5 - TODO
 /**
  * Add in some level music.
- * 
  * This can be done here in the base GameLevel class, or in Level1 and Level2,
  * it's up to you.
  */
@@ -133,9 +131,8 @@ export default class GameLevel extends Scene {
                     // An balloon collided with the player, destroy it and use the particle system
                     this.balloonsPopped++;
                     this.balloonLabel.text = "Balloons Left: " + (this.totalBalloons - this.balloonsPopped);
-                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: 'balloon_pop', loop: false})
                     let node = event.data.get('owner')
-                    console.log(node)
+                    // console.log(node)
                     // // Set mass based on color
                     let particleMass = 0;
                     if ((<BalloonController>node._ai).color == HW5_Color.RED) {
@@ -151,6 +148,7 @@ export default class GameLevel extends Scene {
                     node.destroy();
 
                     this.emitter.fireEvent(HW5_Events.PLAYER_ENTERED_LEVEL_END)
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: 'balloon_pop', loop: false, holdReference: false})
                 }
                     break;
 
@@ -359,11 +357,9 @@ export default class GameLevel extends Scene {
         this.levelEndArea.color = new Color(0, 0, 0, 0);
     }
 
-    // HOMEWORK 5 - TODO
     /*
         Make sure balloons are being set up properly to have triggers so that when they collide
         with players, they send out a trigger event.
-
         Look at the levelEndArea trigger for reference.
     */
     /**
@@ -382,7 +378,6 @@ export default class GameLevel extends Scene {
         balloon.setGroup("balloon");
     }
 
-    // HOMEWORK 5 - TODO
     /**
      * You must implement this method.
      * There are 3 types of collisions:

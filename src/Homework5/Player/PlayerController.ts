@@ -37,7 +37,6 @@ export default class PlayerController extends StateMachineAI {
     tilemap: OrthogonalTilemap;
     suitColor: HW5_Color;
 
-    // HOMEWORK 5 - TODO
     /**
      * Implement a death animation for the player using tweens. The animation rotate the player around itself multiple times
      * over the tween duration, as well as fading out the alpha value of the player. The tween should also make use of the
@@ -120,7 +119,6 @@ export default class PlayerController extends StateMachineAI {
         super.changeState(stateName);
     }
 
-    // HOMEWORK 5 - TODO
     /**
      * We want to detect when our player is moving over one of the switches in the world, and along with the sound
      * and label changes, we also visually want to change the tile.
