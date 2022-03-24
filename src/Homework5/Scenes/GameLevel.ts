@@ -132,7 +132,7 @@ export default class GameLevel extends Scene {
                     this.balloonsPopped++;
                     this.balloonLabel.text = "Balloons Left: " + (this.totalBalloons - this.balloonsPopped);
                     let node = event.data.get('owner')
-                    // console.log(node)
+
                     // // Set mass based on color
                     let particleMass = 0;
                     if ((<BalloonController>node._ai).color == HW5_Color.RED) {
@@ -185,6 +185,8 @@ export default class GameLevel extends Scene {
                             }
                         }
                         this.sceneManager.changeToScene(this.nextLevel, {}, sceneOptions);
+                    } else { // If there's no next level, then go back to main menu. We could implement a score system
+                        this.sceneManager.changeToScene(MainMenu, {}, this.sceneOptions);
                     }
                 }
                     break;

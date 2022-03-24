@@ -5,7 +5,6 @@ import { HW5_Color } from "../hw5_color";
 import GameLevel from "./GameLevel";
 
 export default class Level2 extends GameLevel {
-    // HOMEWORK 5 - TODO
     /**
      * Decide which resource to keep and which to leave out.
      * 
@@ -14,15 +13,12 @@ export default class Level2 extends GameLevel {
     loadScene(): void {
         // Load resources
         this.load.tilemap("level2", "hw5_assets/tilemaps/level2.json");
-        // this.load.spritesheet("player", "hw5_assets/spritesheets/spike.json");
         this.load.spritesheet("green", "hw5_assets/spritesheets/greenBalloon.json");
-        // this.load.spritesheet("red", "hw5_assets/spritesheets/redBalloon.json");
-        // this.load.spritesheet("blue", "hw5_assets/spritesheets/blueBalloon.json");
-        // this.load.audio("jump", "hw5_assets/sounds/jump.wav");
-        // this.load.audio("switch", "hw5_assets/sounds/switch.wav");
-        // this.load.audio("player_death", "hw5_assets/sounds/player_death.wav");
         this.load.audio("level_music", "hw5_assets/music/level_2.mp3");
-        // this.load.audio('balloon_pop', 'hw5_assets/sounds/balloon_pop.wav')
+    }
+
+    unloadScene(): void {
+        this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: 'level_music'})
     }
 
     startScene(): void {

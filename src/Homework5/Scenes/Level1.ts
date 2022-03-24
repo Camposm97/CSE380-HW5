@@ -23,7 +23,6 @@ export default class Level1 extends GameLevel {
         this.load.audio('balloon_pop', 'hw5_assets/sounds/balloon_pop.wav')
     }
 
-    // HOMEWORK 5 - TODO
     /**
      * Decide which resource to keep and which to cull.
      * 
