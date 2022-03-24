@@ -406,16 +406,11 @@ export default class GameLevel extends Scene {
     protected handlePlayerBalloonCollision(player: AnimatedSprite, balloon: AnimatedSprite) {
         if (balloon !== undefined) {
             let pc = <PlayerController> player._ai
-        let bc = <BalloonController> balloon._ai
-        if (bc.color !== pc.suitColor) {
-            this.incPlayerLife(-1)
-            // GameLevel.livesCount--
-            // this.livesCountLabel.text = `Lives: ${GameLevel.livesCount}`
-            // if (GameLevel.livesCount === 0) {
-            //     this.emitter.fireEvent(HW5_Events.PLAYER_KILLED)
-            // }
-        }
-        this.emitter.fireEvent(HW5_Events.BALLOON_POPPED, {owner: balloon})
+            let bc = <BalloonController> balloon._ai
+            if (bc.color !== pc.suitColor) {
+                this.incPlayerLife(-1)
+            }
+            this.emitter.fireEvent(HW5_Events.BALLOON_POPPED, {owner: balloon})
         }
     }
 
